@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  文化产品价值失范综合预警平台 —— 骨架（第 1 步产出）
+  ------------------------------------------------------------
+  这一步只做一件事：把「顶栏 / 侧边栏 / 主内容区」三块地方
+  用正确的标签摆好位置，能在浏览器里看到布局。
+  还不写路由、不写数据、不写接口 —— 那些是后面的事。
+
+  为什么 <main> 里几乎是空的？
+  因为真正的页面内容将来由 JS 动态渲染进去。
+  这一步先把「容器」建好，后面往里填。
+  ============================================================
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <!-- 响应式的前提：让移动端按设备真实宽度渲染，而不是缩放的桌面版 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="文化产品价值失范综合预警平台">
+  <title>文化产品价值失范综合预警平台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    无障碍第一步：键盘用户按 Tab 时，第一个能聚焦的是「跳到主要内容」。
+    平时它藏在屏幕外（见 CSS .skip-link），聚焦时才浮现。
+  -->
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <!-- app-shell 是整个页面的布局容器，Grid 布局就挂在它身上 -->
+  <div class="app-shell" id="app-shell">
+
+    <!-- ==================== 顶栏 ==================== -->
+    <header class="topbar">
+
+      <!-- 小屏幕下显示的三条杠按钮。用 span 配合 CSS 画线，不用图片 -->
+      <button class="hamburger js-toggle-menu" type="button" aria-label="打开导航菜单">
+        <span></span>
+      </button>
+
+      <!-- 品牌区：左侧盾牌标识 + 平台名 -->
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">盾</span>
+        <span class="brand-text">文化产品价值失范综合预警平台</span>
+      </div>
+
+      <!-- 实时时钟。里面的内容会被 app.js 每秒更新一次 -->
+      <div class="clock-block" aria-label="当前日期时间">
+        <strong id="current-time">--:--:--</strong>
+        <span id="current-date">加载中…</span>
+      </div>
+
+      <!-- 顶栏右侧：状态胶囊 + 管理员按钮 -->
+      <div class="topbar-actions">
+        <span class="status-chip"><i aria-hidden="true"></i>系统运行正常</span>
+        <button class="admin-button" type="button">管理员</button>
+      </div>
+
+    </header>
+
+    <!-- ==================== 侧边栏 ==================== -->
+    <aside class="sidebar" id="sidebar" aria-label="主导航">
+      <nav class="main-nav">
+
+        <!-- 每个菜单项的结构固定成三段：
+             [图标占位符] + [nav-text 文字] + 可选的 [nav-badge 徽标]
+
+             为什么文字必须用 <span> 包起来？
+             因为「折叠侧边栏」时需要精确地把文字和徽标藏掉、只留图标。
+             如果文字是裸的文本节点，CSS 根本没有选择器能选中它
+             —— 这是我自己踩过的坑，下面 .nav-text 的选择器就是为它准备的。
+
+             data-icon="xxx" 是占位符，icons.js 会把它替换成真正的 SVG。 -->
+        <a class="nav-item" href="#/overview">
+          <span class="nav-icon" data-icon="house"></span>
+          <span class="nav-text">总览</span>
+        </a>
+        <a class="nav-item" href="#/alerts">
+          <span class="nav-icon" data-icon="bell"></span>
+          <span class="nav-text">实时预警</span>
+          <span class="nav-badge">12</span>
+        </a>
+        <a class="nav-item" href="#/analysis">
+          <span class="nav-icon" data-icon="scan"></span>
+          <span class="nav-text">研判中心</span>
+        </a>
+
+        <!-- 用 <a href="#/xxx"> 而不是 <button>：hash 路由就是靠这些链接驱动的。
+             注意：这一步点了只会改地址栏，页面不会切换 ——
+             因为路由逻辑还没写。这正是第 2 步要干的事。
+
+             下面三个是「还没做的功能」。原平台这里用的是普通 <button>，
+             点了毫无反应也没有任何提示——那是个体验缺陷；
+             我们直接加 disabled，用户一眼就能看出「暂未开放」，比默默无响应好。 -->
+        <button class="nav-item" type="button" disabled>
+          <span class="nav-icon" data-icon="users"></span>
+          <span class="nav-text">重点账号</span>
+        </button>
+        <button class="nav-item" type="button" disabled>
+          <span class="nav-icon" data-icon="clipboard"></span>
+          <span class="nav-text">审批记录</span>
+        </button>
+        <button class="nav-item" type="button" disabled>
+          <span class="nav-icon" data-icon="settings"></span>
+          <span class="nav-text">系统设置</span>
+        </button>
+
+      </nav>
+
+      <button class="collapse-button js-collapse" type="button">
+        <span class="collapse-arrow" aria-hidden="true"></span>
+        <span class="collapse-label">收起菜单</span>
+      </button>
+    </aside>
+
+    <!-- 移动端侧边栏展开时的半透明遮罩，点击它收起菜单 -->
+    <button class="sidebar-backdrop js-toggle-menu" type="button" aria-label="关闭导航菜单"></button>
+
+    <!-- ==================== 主内容区 ==================== -->
+    <!-- tabindex="-1" 让它可以被 JS 聚焦（配合 skip-link 使用） -->
+    <main class="main-content" id="main-content" tabindex="-1">
+      <div class="placeholder-card">
+        <h1>骨架已就绪</h1>
+        <p>这是主内容区。现在它还是空的，下一步我们会让 JS 把真实的页面渲染进来。</p>
+        <p class="hint">试着点一下侧边栏的「总览 / 实时预警 / 研判中心」，观察地址栏的变化。</p>
+
+        <!-- ==================== 里程碑 1：前后端联调 ==================== -->
+        <div class="api-test">
+          <h2>前后端联调测试</h2>
+          <p class="ts">点下面这个按钮，页面会去请求后端 <code>http://127.0.0.1:5000/api/health</code>。</p>
+          <button class="primary-button js-call-api" type="button">调用后端接口</button>
+          <pre class="api-output" id="api-output">还没有调用过。</pre>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- 脚本顺序很重要：icons.js 必须在 app.js 之前。
+       defer 的作用是「等 HTML 解析完再按书写顺序执行」，
+       所以 app.js 运行时一定能拿到 window.hydrateIcons。 -->
+  <script defer src="icons.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>

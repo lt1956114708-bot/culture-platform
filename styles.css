@@ -1,0 +1,534 @@
+/* ============================================================
+   文化产品价值失范综合预警平台 —— 样式（第 1 步产出）
+   ------------------------------------------------------------
+   阅读顺序：① 变量 → ② 重置 → ③ 布局 → ④ 各区块细节 → ⑤ 响应式
+   全文最关键的是第 ③ 节「.app-shell」那 8 行，它撑起了整个后台布局。
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   ① 设计变量：颜色、尺寸统一在这里定义，改一处全站生效
+   ------------------------------------------------------------ */
+:root {
+  /* 品牌与语义色 */
+  --c-brand:        #1d4ed8;   /* 主色：链接、强调、激活态 */
+  --c-brand-weak:   #eef3ff;   /* 主色的浅底，用于激活项背景 */
+  --c-danger:       #d92d20;   /* 警示红：高危、徽标 */
+
+  /* 结构色 */
+  --c-topbar-bg:    #152238;   /* 顶栏深色 */
+  --c-page-bg:      #f4f6f9;   /* 页面底色（浅灰） */
+  --c-surface:      #ffffff;   /* 卡片/面板白底 */
+  --c-border:       #e4e8ee;   /* 分隔线 */
+
+  /* 文字色 */
+  --c-text:         #1f2733;   /* 正文 */
+  --c-text-muted:   #6b7686;   /* 次要信息 */
+  --c-text-invert:  #ffffff;   /* 深底上的文字 */
+
+  /* 尺寸 */
+  --radius:         10px;
+  --topbar-h:       64px;
+  --sidebar-w:      232px;
+  --sidebar-w-min:  68px;      /* 折叠后的宽度 */
+}
+
+
+/* ------------------------------------------------------------
+   ② 全局重置
+   ------------------------------------------------------------ */
+/* box-sizing: border-box 让 padding 和 border 算进宽度里，
+   否则「width:100% + padding」会把容器撑爆。这是新手最常见的坑之一。 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* system-ui 会优先用系统自带字体，中文再兜底到微软雅黑，加载快且清晰 */
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--c-text);
+  background: var(--c-page-bg);
+}
+
+button {
+  font: inherit;          /* 按钮默认不继承字体，这一行让它跟 body 一致 */
+  color: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+/* ------------------------------------------------------------
+   ③ 布局核心：一个 Grid 把页面切成四块
+   ------------------------------------------------------------
+   grid-template-areas 用「画图」的方式描述布局，非常直观：
+
+        "topbar  topbar"     ← 第一行：顶栏横跨两列
+        "sidebar main"       ← 第二行：左边侧栏，右边主内容
+
+   然后再用 grid-template-columns / rows 说明每一行每一列多宽多高。
+   改布局时只要重画这张「文字图」就行，不用去算位置。
+   ------------------------------------------------------------ */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;   /* 第一列固定宽，第二列占满剩余 */
+  grid-template-rows: var(--topbar-h) 1fr;       /* 第一行固定高，第二行占满剩余 */
+  grid-template-areas:
+    "topbar  topbar"
+    "sidebar main";
+  min-height: 100vh;                             /* 至少撑满一屏，内容多了自然变长 */
+  transition: grid-template-columns 0.2s ease;   /* 折叠时列宽平滑过渡 */
+}
+
+/* 折叠态：只改第一列的宽度，侧边栏自动收窄 */
+.app-shell.is-collapsed {
+  grid-template-columns: var(--sidebar-w-min) 1fr;
+}
+
+/* 把区域名分给对应元素 */
+.topbar       { grid-area: topbar; }
+.sidebar      { grid-area: sidebar; }
+.main-content { grid-area: main; }
+
+
+/* ------------------------------------------------------------
+   ④-1 无障碍跳转链接（平时藏在屏幕外，键盘聚焦时滑入）
+   ------------------------------------------------------------ */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: var(--c-brand);
+  color: var(--c-text-invert);
+  transform: translateY(-200%);        /* 默认移到可视区外 */
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);            /* 聚焦时滑回来 */
+}
+
+
+/* ------------------------------------------------------------
+   ④-2 顶栏
+   ------------------------------------------------------------ */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  background: var(--c-topbar-bg);
+  color: var(--c-text-invert);
+  position: sticky;      /* 滚动时吸顶 */
+  top: 0;
+  z-index: 60;           /* 层级要高于遮罩(25)和侧边栏(40)，保证顶栏永远可见 */
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;   /* 标题不换行 */
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--c-brand);
+  font-size: 13px;
+}
+
+/* 时钟：等宽字体，数字跳动时宽度不会抖 */
+.clock-block {
+  display: flex;
+  align-items: baseline;   /* 让大字和小字底部对齐，视觉更稳 */
+  gap: 8px;
+  margin-left: 8px;
+  font-size: 12px;
+  color: #9fb0c7;
+}
+.clock-block strong {
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;   /* 数字等宽，秒数变化时不左右跳 */
+  color: var(--c-text-invert);
+}
+
+/* margin-left: auto 是 flex 里的经典技巧：
+   把剩下的所有空间推到左边，于是这一组元素被挤到最右侧 */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;                  /* 足够大的圆角 = 胶囊形 */
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  color: #b9e6c8;
+}
+.status-chip i {                          /* 绿色小圆点，用空标签画 */
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+}
+
+.admin-button {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--c-text-invert);
+  font-size: 13px;
+}
+.admin-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 三条杠按钮：用 ::before / ::after 配合自身画三根线，不依赖图标图片 */
+.hamburger {
+  display: none;            /* 默认隐藏，小屏才出现（见响应式） */
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+.hamburger span,
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c-text-invert);
+}
+.hamburger span       { top: 17px; }
+.hamburger::before    { top: 11px; }
+.hamburger::after     { top: 23px; }
+
+
+/* ------------------------------------------------------------
+   ④-3 侧边栏
+   ------------------------------------------------------------ */
+.sidebar {
+  display: flex;
+  flex-direction: column;      /* 导航在上，收起按钮在下 */
+  padding: 14px 12px;
+  background: var(--c-surface);
+  border-right: 1px solid var(--c-border);
+  position: sticky;
+  top: var(--topbar-h);        /* 吸在顶栏下方 */
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;            /* 菜单太多时自己滚动 */
+}
+
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  color: var(--c-text);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* 图标容器：icons.js 会把 <svg> 塞进这个 span 里。
+   flex:none 很关键 —— 侧边栏变窄时，flex 子项默认会被压扁，
+   加了这个才不会被挤变形。 */
+.nav-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+}
+.nav-icon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* 图标配色跟随菜单项状态：默认柔和、激活变主色、禁用置灰。
+   之所以一个图标能变三种颜色，是因为 icons.js 里画的是
+   stroke="currentColor" —— 颜色由 CSS 的 color 决定，不是写死的。 */
+.nav-item .nav-icon          { color: var(--c-text-muted); }
+.nav-item.is-active .nav-icon { color: var(--c-brand); }
+.nav-item:disabled .nav-icon  { color: #aab3c0; }
+
+.nav-item:hover:not(:disabled) {
+  background: var(--c-page-bg);
+}
+
+/* 激活态：平时由 JS 在路由切换时加 .is-active，这一步先手工演示用 */
+.nav-item.is-active {
+  background: var(--c-brand-weak);
+  color: var(--c-brand);
+  font-weight: 500;
+}
+
+/* 未开放的菜单：明确置灰 + 禁止点击 */
+.nav-item:disabled {
+  color: #aab3c0;
+  cursor: not-allowed;
+}
+
+/* 右侧数字徽标：margin-left:auto 把它推到最右 */
+.nav-badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--c-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* 底部的「收起菜单」按钮：同样用 margin-top:auto 推到底部 */
+.collapse-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.collapse-button:hover {
+  background: var(--c-page-bg);
+}
+
+/* 折叠箭头：一个正方形只画两条边，旋转 45° 就成了箭头 */
+.collapse-arrow {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: 3px;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+/* 折叠后：藏起文字和徽标，只留图标，整体居中 */
+.app-shell.is-collapsed .collapse-label { display: none; }
+.app-shell.is-collapsed .collapse-button { justify-content: center; }
+.app-shell.is-collapsed .collapse-arrow { transform: rotate(-135deg); margin-left: 0; }
+
+/* 这里选的是 .nav-text 这个 class，而不是写成 `.nav-item > span`。
+   因为菜单项里除了文字，图标容器和徽标也都是 span，
+   用 `> span` 会把图标一起藏掉、只剩一片空白 —— 这个坑我第一版就踩了。
+   结论：给要精确控制的元素加语义化 class，比用标签选择器可靠。 */
+.app-shell.is-collapsed .nav-text,
+.app-shell.is-collapsed .nav-badge { display: none; }
+
+.app-shell.is-collapsed .nav-item { justify-content: center; padding: 10px 0; }
+
+
+/* ------------------------------------------------------------
+   ④-4 主内容区
+   ------------------------------------------------------------ */
+.main-content {
+  padding: 24px;
+  min-width: 0;      /* 关键：Grid/Flex 子项默认 min-width:auto，
+                        内部有长表格时会撑破布局，设 0 才能正常收缩 */
+}
+.main-content:focus { outline: none; }
+
+.placeholder-card {
+  max-width: 640px;
+  padding: 28px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+}
+.placeholder-card h1 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 500;
+}
+.placeholder-card p {
+  margin: 0 0 8px;
+  color: var(--c-text-muted);
+}
+.placeholder-card .hint {
+  margin-bottom: 0;
+  color: var(--c-brand);
+}
+
+
+/* ------------------------------------------------------------
+   ④-5 前后端联调测试区（里程碑 1）
+   ------------------------------------------------------------ */
+.api-test {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--c-border);
+}
+.api-test h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.api-test p {
+  margin: 0 0 12px;
+  color: var(--c-text-muted);
+  font-size: 13px;
+}
+.api-test code {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--c-page-bg);
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  color: var(--c-text);
+}
+
+.primary-button {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--c-brand);
+  color: #fff;
+  font-size: 13px;
+  transition: background 0.15s ease;
+}
+.primary-button:hover  { background: #1740b8; }
+.primary-button:active { transform: translateY(1px); }
+
+/* 深色代码块：原样显示接口返回的 JSON。
+   white-space: pre-wrap 既能保留换行，又允许长行自动折行 */
+.api-output {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #cbd5e1;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 56px;
+}
+
+/* 移动端遮罩：默认不存在，小屏展开菜单时才出现 */
+.sidebar-backdrop {
+  display: none;
+}
+
+
+/* ------------------------------------------------------------
+   ⑤ 响应式：屏幕窄于 900px 时，侧边栏改成「抽屉」
+   ------------------------------------------------------------ */
+@media (max-width: 900px) {
+
+  /* 布局退回单列：顶栏一行，下面全是主内容 */
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "main";
+  }
+
+  /* 时钟在小屏收起，把位置让给标题 */
+  .clock-block { display: none; }
+
+  /* 三条杠按钮出现 */
+  .hamburger { display: block; flex: none; }
+
+  /* 侧边栏脱离文档流，浮在内容上层，默认滑出屏幕外 */
+  .sidebar {
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0;
+    z-index: 40;
+    width: var(--sidebar-w);
+    height: calc(100vh - var(--topbar-h));
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  }
+
+  /* body 加上 .menu-open 时才滑进来 */
+  body.menu-open .sidebar { transform: translateX(0); }
+
+  /* 同时显示遮罩：只盖住顶栏以下的内容区 */
+  body.menu-open .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: var(--topbar-h);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 25;
+    border: 0;
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  /* 小屏下折叠功能没意义，隐藏收起按钮 */
+  .collapse-button { display: none; }
+
+  /* 顶栏在窄屏要做「断舍离」：先砍时钟，再砍状态胶囊，
+     最后让标题用省略号收尾 —— 绝不允许换行把顶栏撑成两行。
+     取舍优先级：标题 > 管理员 > 状态胶囊 > 时钟 */
+  .status-chip { display: none; }
+  .topbar { gap: 10px; padding: 0 12px; }
+
+  /* flex 子项默认 min-width:auto，不加这行文字不会收缩，
+     text-overflow: ellipsis 也就永远不会生效 */
+  .brand { min-width: 0; }
+  .brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;      /* 关键：不换行，超出部分打省略号 */
+    font-size: 13px;
+  }
+
+  .topbar-actions { gap: 8px; }
+  .admin-button { flex: none; white-space: nowrap; font-size: 12px; padding: 5px 10px; }
+
+  .main-content { padding: 16px; }
+}
