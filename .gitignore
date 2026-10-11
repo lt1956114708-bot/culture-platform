@@ -49,8 +49,7 @@ logs/
 Thumbs.db
 desktop.ini
 
-# ---- 我自己用来验证的临时文件（下划线开头）----
-_step2-*.json
-_step2-*.png
-_preview-*.png
-_verify.json
+# ---- 我自己用来验证的临时文件（一律下划线开头）----
+# 用一条通配规则搞定，免得每新增一种验证就漏掉一批 —— 之前就漏过一次，
+# 结果 _p1-overview.png 这些截图差点被提交上去
+_*

@@ -1,7 +1,7 @@
 # 第二步作战手册：把代码推上 GitHub，再部署到云端
 
-> 前提：里程碑 1（本机联调）已完成，`D:\culture-platform` 能本地跑通。
-> 目标：让别人用手机也能打开你的页面。
+> 前提：里程碑 1（本机联调）已完成，`D:\culture-platform` 能本地跑通。  
+> 目标：让别人用手机也能打开你的页面。  
 > 预计耗时：2-3 小时（含注册账号）。
 
 ---
@@ -10,11 +10,11 @@
 
 我在你动手前先把两个最容易踩的坑排掉了：
 
-| 准备项 | 状态 | 说明 |
-|---|---|---|
-| `.gitignore` | ✅ 已创建并验证 | 已确认 `.venv`（17.7 MB / 1372 个文件）会被排除，源文件不会被误伤 |
-| WSGI 入口验证 | ✅ 已用 waitress 验证 | `app:app` 这个入口是对的，Render 上换成 `gunicorn app:app` 也能跑 |
-| 依赖清单 | ✅ `requirements.txt` | Flask 3.1.3 / flask-cors 6.0.5 / gunicorn 26.2.0 |
+| 准备项          | 状态                   | 说明                                                  |
+| ------------ | -------------------- | --------------------------------------------------- |
+| `.gitignore` | ✅ 已创建并验证             | 已确认 `.venv`（17.7 MB / 1372 个文件）会被排除，源文件不会被误伤        |
+| WSGI 入口验证    | ✅ 已用 waitress 验证     | `app:app` 这个入口是对的，Render 上换成 `gunicorn app:app` 也能跑 |
+| 依赖清单         | ✅ `requirements.txt` | Flask 3.1.3 / flask-cors 6.0.5 / gunicorn 26.2.0    |
 
 **提交到 GitHub 的会是这 9 个文件**：
 
@@ -34,15 +34,15 @@ server/requirements.txt   48 B
 
 ## 第 1 步：先把 `git` 命令修好（你会卡在这里）
 
-**现状**：你机器上的 Git 是 WorkBuddy **自带的便携版**，藏在
-`D:\WB\WorkBuddy\resources\vendor\PortableGit\`，**没有注册到系统 PATH**。
+**现状**：你机器上的 Git 是 WorkBuddy **自带的便携版**，藏在  
+`D:\WB\WorkBuddy\resources\vendor\PortableGit\`，**没有注册到系统 PATH**。  
 所以在 PowerShell 里敲 `git` 会提示"无法识别"。
 
 ### 方案 A：装官方 Git（推荐，10 分钟）
 
-1. 打开 https://git-scm.com/download/win ，下载会**自动开始**
+1. 打开 <https://git-scm.com/download/win> ，下载会**自动开始**
 2. 双击安装，**一路默认选项**即可
-   - 唯一要留意的页面是 "Adjusting your PATH environment"，
+   - 唯一要留意的页面是 "Adjusting your PATH environment"，  
      保持默认的 **"Git from the command line and also from 3rd-party software"**
 3. 装完**重新打开一个新的 PowerShell**（旧窗口读不到新的 PATH）
 4. 验证：
@@ -50,10 +50,11 @@ server/requirements.txt   48 B
 ```powershell
 git --version
 ```
+
 出现 `git version 2.x.x` 就成功了。
 
-> **为什么推荐装官方版？** 便携版在 WorkBuddy 目录里，
-> 将来软件升级、卸载或重装，这个 git 就没了。而且服务器上你必须用命令行 git，
+> **为什么推荐装官方版？** 便携版在 WorkBuddy 目录里，  
+> 将来软件升级、卸载或重装，这个 git 就没了。而且服务器上你必须用命令行 git，  
 > 现在装好是长期投资。
 
 ### 方案 B：不装，临时借用便携版
@@ -132,7 +133,7 @@ A  server/requirements.txt
 ...
 ```
 
-**绝对不能出现任何带 `venv` 的行。** 如果出现了，说明 `.gitignore` 没生效，
+**绝对不能出现任何带 `venv` 的行。** 如果出现了，说明 `.gitignore` 没生效，  
 **立刻停下**——否则你会把 1372 个 Windows 版的依赖文件传上去。
 
 想更保险，用这条命令数一下文件数量：
@@ -155,7 +156,7 @@ git commit -m "feat: 初始提交 —— 前端骨架 + Flask 后端"
 
 ### 4.1 建远程仓库
 
-1. 打开 https://github.com 注册/登录
+1. 打开 <https://github.com> 注册/登录
 2. 右上角 **`+`** → **New repository**
 3. 填写：
    - **Repository name**：`culture-platform`
@@ -177,11 +178,11 @@ git push -u origin main
 **推送时会弹窗要求登录 GitHub**：
 
 - 通常会自动弹出浏览器，点授权即可（官方 Git 自带的 Credential Manager 会处理）
-- 如果没有弹窗、而是让你输用户名密码：**密码栏不能填你的登录密码**，
-  GitHub 早就不支持密码推送了。需要去
-  `GitHub → Settings → Developer settings → Personal access tokens` 生成一个 Token，
+- 如果没有弹窗、而是让你输用户名密码：**密码栏不能填你的登录密码**，  
+  GitHub 早就不支持密码推送了。需要去  
+  `GitHub → Settings → Developer settings → Personal access tokens` 生成一个 Token，  
   用它当密码。
-- ⚠️ **国内网络访问 GitHub 可能超时**。如果卡住不动，多半是网络问题，
+- ⚠️ **国内网络访问 GitHub 可能超时**。如果卡住不动，多半是网络问题，  
   不是命令写错了。
 
 ### 4.3 验收
@@ -196,7 +197,7 @@ git push -u origin main
 
 ### 5.1 注册
 
-打开 https://render.com ，用 GitHub 账号直接登录（最省事）。
+打开 <https://render.com> ，用 GitHub 账号直接登录（最省事）。
 
 ### 5.2 创建 Web Service
 
@@ -205,18 +206,18 @@ git push -u origin main
 3. 连接你的 `culture-platform` 仓库
 4. 逐项填写（**这几项填错就是 502，仔细核对**）：
 
-| 配置项 | 填什么 | 为什么 |
-|---|---|---|
-| **Name** | `culture-platform-api` | 会变成你的域名前缀 |
-| **Region** | `Singapore` | 离中国最近，延迟最低 |
-| **Branch** | `main` | |
-| **Root Directory** | **`server`** | ★ 代码在子目录里，不填就找不到 app.py |
-| **Runtime** | `Python 3` | |
-| **Build Command** | `pip install -r requirements.txt` | |
-| **Start Command** | **`gunicorn app:app`** | ★ 这就是你本地验证过的那个入口 |
-| **Instance Type** | `Free` | |
+| 配置项                | 填什么                               | 为什么                     |
+| ------------------ | --------------------------------- | ----------------------- |
+| **Name**           | `culture-platform-api`            | 会变成你的域名前缀               |
+| **Region**         | `Singapore`                       | 离中国最近，延迟最低              |
+| **Branch**         | `main`                            |                         |
+| **Root Directory** | **`server`**                      | ★ 代码在子目录里，不填就找不到 app.py |
+| **Runtime**        | `Python 3`                        |                         |
+| **Build Command**  | `pip install -r requirements.txt` |                         |
+| **Start Command**  | **`gunicorn app:app`**            | ★ 这就是你本地验证过的那个入口        |
+| **Instance Type**  | `Free`                            |                         |
 
-5. 点 **Create Web Service**
+1. 点 **Create Web Service**
 
 ### 5.3 等待并验收
 
@@ -251,21 +252,21 @@ https://culture-platform-api.onrender.com/api/health
 1. 打开你的仓库 → **Settings** → 左侧 **Pages**
 2. **Source** 选 `Deploy from a branch`
 3. **Branch** 选 `main`，目录选 `/ (root)`，点 Save
-4. 等 1-2 分钟，页面顶部会显示你的网址：
+4. 等 1-2 分钟，页面顶部会显示你的网址：  
    `https://你的用户名.github.io/culture-platform/`
 
 因为你的 `index.html` 用的是相对路径（`href="styles.css"`），所以部署在子目录下也能正常工作。
 
 ### 方案 2：Cloudflare Pages
 
-1. https://pages.cloudflare.com → Connect to Git
+1. <https://pages.cloudflare.com> → Connect to Git
 2. 选仓库
 3. 配置：**Framework preset** 选 `None`，**Build command 留空**，**Build output directory** 填 `/`
 4. Save and Deploy
 
 ### 方案 3：Vercel
 
-1. https://vercel.com → Add New → Project → 导入仓库
+1. <https://vercel.com> → Add New → Project → 导入仓库
 2. **Framework Preset** 选 `Other`
 3. Build Command 和 Output Directory 都**留空**
 4. Deploy
@@ -303,7 +304,7 @@ git push
 
 ### ⚠️ 两个必须注意的点
 
-1. **必须是 `https://`**。线上前端是 https，如果后端写成 `http://`，
+1. **必须是 `https://`**。线上前端是 https，如果后端写成 `http://`，  
    浏览器会当作"混合内容"直接拦截——又一个高频坑。
 2. **Render 地址别写错**，注意是 `onrender.com` 不是 `render.com`。
 
@@ -327,17 +328,17 @@ git push
 
 ## 常见报错速查
 
-| 报错 | 原因 | 怎么解决 |
-|---|---|---|
-| `git: 无法将"git"项识别为...` | 没装官方 Git / 没重开终端 | 回到第 1 步 |
-| 推送卡住不动 | 国内网络访问 GitHub 慢 | 多试几次，或换个时间段 |
-| 推送时要密码但登录密码无效 | GitHub 不支持密码推送 | 生成 Personal Access Token 当密码 |
-| Render 构建失败 `No such file: requirements.txt` | **Root Directory 没填 `server`** | 改配置，重新部署 |
-| Render 启动失败 `gunicorn: command not found` | requirements.txt 里没写 gunicorn | 确认文件里有 `gunicorn==26.2.0` |
-| 后端地址打不开（502） | 启动命令写错 / 服务崩了 | 看 Render 的 Logs 标签页 |
-| 前端能开但接口报 CORS | 后端没启用 CORS | 确认 `app.py` 里 `ENABLE_CORS = True` |
-| 接口报"混合内容"错误 | 用了 `http://` 访问后端 | 改成 `https://` |
-| 页面样式丢失 | 用了绝对路径 `/styles.css` | 检查 HTML 里是相对路径 |
+| 报错                                           | 原因                             | 怎么解决                               |
+| -------------------------------------------- | ------------------------------ | ---------------------------------- |
+| `git: 无法将"git"项识别为...`                       | 没装官方 Git / 没重开终端               | 回到第 1 步                            |
+| 推送卡住不动                                       | 国内网络访问 GitHub 慢                | 多试几次，或换个时间段                        |
+| 推送时要密码但登录密码无效                                | GitHub 不支持密码推送                 | 生成 Personal Access Token 当密码       |
+| Render 构建失败 `No such file: requirements.txt` | **Root Directory 没填 `server`** | 改配置，重新部署                           |
+| Render 启动失败 `gunicorn: command not found`    | requirements.txt 里没写 gunicorn  | 确认文件里有 `gunicorn==26.2.0`          |
+| 后端地址打不开（502）                                 | 启动命令写错 / 服务崩了                  | 看 Render 的 Logs 标签页                |
+| 前端能开但接口报 CORS                                | 后端没启用 CORS                     | 确认 `app.py` 里 `ENABLE_CORS = True` |
+| 接口报"混合内容"错误                                  | 用了 `http://` 访问后端              | 改成 `https://`                      |
+| 页面样式丢失                                       | 用了绝对路径 `/styles.css`           | 检查 HTML 里是相对路径                     |
 
 ---
 
@@ -347,5 +348,5 @@ git push
 
 1. **代码如何从本地走到公网** —— Git 是中转站，平台负责构建和运行
 2. **开发环境和生产环境的差异** —— 启动方式不同（`python app.py` vs `gunicorn app:app`）、地址不同（`127.0.0.1` vs 域名）、安全要求不同
-3. **配置即排错线索** —— Render 那 8 个配置项，每一项填错都会产生**不同**的报错。
+3. **配置即排错线索** —— Render 那 8 个配置项，每一项填错都会产生**不同**的报错。  
    你能从报错反推是哪一项错了，就真正会部署了。
