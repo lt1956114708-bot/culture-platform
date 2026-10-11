@@ -703,12 +703,28 @@
       " " + WEEKDAYS[now.getDay()];
   }
 
-  /* 接口地址按环境自动切换：本地走本机，线上走 Render */
+  /* 接口地址按部署环境自动切换。
+     目前这份代码会在三种地方运行，各需要一个不同的后端地址：
+
+       ① 本地开发      → 后端在本机 5000 端口
+       ② GitHub Pages  → 后端在 Render（不同域名，属于跨域）
+       ③ 自建服务器    → 前端和后端在同一台机器、同一个源，
+                          所以用「相对路径」交给 nginx 转发即可 ——
+                          写死 IP 的话，IP 一变就得改代码。
+
+     注意 ③ 的价值：因为是同源，浏览器根本不会触发跨域检查，
+     后端连 CORS 响应头都不需要配。这是生产环境常见的做法。 */
   var LOCAL_HOSTS = ["127.0.0.1", "localhost", ""];
   var IS_LOCAL = LOCAL_HOSTS.indexOf(location.hostname) !== -1;
-  var API_BASE = IS_LOCAL
-    ? "http://127.0.0.1:5000"
-    : "https://culture-platform.onrender.com";
+
+  var API_BASE;
+  if (IS_LOCAL) {
+    API_BASE = "http://127.0.0.1:5000";                     // ① 本地
+  } else if (location.hostname.indexOf("github.io") > -1) {
+    API_BASE = "https://culture-platform.onrender.com";     // ② GitHub Pages
+  } else {
+    API_BASE = "";                                          // ③ 自建服务器：同源相对路径
+  }
 
   function callApi() {
     var output = document.getElementById("api-output");
